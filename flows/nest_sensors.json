@@ -1,0 +1,171 @@
+[  
+  {  
+    "type":"tab",
+    "id":"ae98ab97.f28078",
+    "label":"Log Nest Readings",
+    "_def":{  
+      "defaults":{  
+        "label":{  
+          "value":""
+        }
+      }
+    }
+  },
+  {  
+    "id":"22ab56d8.dd54aa",
+    "type":"mqtt-broker",
+    "z":"52a0f579.ad5f0c",
+    "broker":"localhost",
+    "port":"1883",
+    "clientid":"",
+    "usetls":false,
+    "verifyservercert":true,
+    "compatmode":true,
+    "keepalive":"60",
+    "cleansession":true,
+    "willTopic":"",
+    "willQos":"0",
+    "willRetain":null,
+    "willPayload":"",
+    "birthTopic":"",
+    "birthQos":"0",
+    "birthRetain":null,
+    "birthPayload":""
+  },
+  {  
+    "id":"deba15ef.be0ed8",
+    "type":"comment",
+    "z":"ae98ab97.f28078",
+    "name":"Log Nest Thermostat Readings",
+    "info":"This flow illustrates how to take sensor data from a NEST Thermostat, transform that data and post to a local InfluxDB instance.\n\nTo modify this flow for you own environment, you'll need to create a Nest developer account and configure to your local environment",
+    "x":214.5,
+    "y":235,
+    "wires":[  
+
+    ]
+  },
+  {  
+    "id":"86bc13c3.5f201",
+    "type":"nest-config",
+    "z":"ae98ab97.f28078",
+    "account":"Entryway Nest"
+  },
+  {  
+    "id":"35be8522.490f6a",
+    "type":"influxdb",
+    "z":"ae98ab97.f28078",
+    "hostname":"10.171.5.129",
+    "port":"8086",
+    "database":"rosie",
+    "name":"Home InfluxDB"
+  },
+  {  
+    "id":"9947631e.66b8a",
+    "type":"debug",
+    "z":"52a0f579.ad5f0c",
+    "name":"",
+    "active":true,
+    "console":"false",
+    "complete":"payload",
+    "x":574.5,
+    "y":416,
+    "wires":[  
+
+    ]
+  },
+  {  
+    "id":"10f126b1.5285c9",
+    "type":"nest request",
+    "z":"ae98ab97.f28078",
+    "account":"86bc13c3.5f201",
+    "devicetype":"thermostats",
+    "deviceid":"i6mIxJ_lV1Q_7SYlu1K9J-_UI1x3tkbP",
+    "streaming":"false",
+    "name":"Entryway Thermostat",
+    "x":378.5,
+    "y":118,
+    "wires":[  
+      [  
+        "7d3d6e0e.31d0f",
+        "3ce92b17.99dfb4"
+      ]
+    ]
+  },
+  {  
+    "id":"7d3d6e0e.31d0f",
+    "type":"debug",
+    "z":"ae98ab97.f28078",
+    "name":"",
+    "active":true,
+    "console":"false",
+    "complete":"payload",
+    "x":683.5,
+    "y":64,
+    "wires":[  
+
+    ]
+  },
+  {  
+    "id":"156affbf.c601f",
+    "type":"inject",
+    "z":"ae98ab97.f28078",
+    "name":"Start Flow",
+    "topic":"",
+    "payload":"",
+    "payloadType":"date",
+    "repeat":"60",
+    "crontab":"",
+    "once":false,
+    "x":143.5,
+    "y":54,
+    "wires":[  
+      [  
+        "10f126b1.5285c9"
+      ]
+    ]
+  },
+  {  
+    "id":"3ce92b17.99dfb4",
+    "type":"function",
+    "z":"ae98ab97.f28078",
+    "name":"Transform Nest Payload",
+    "func":"if (msg.payload.length === 0) {\n    node.error(\"Error\", \"No message payload found\");\n}\n\nvar payload = msg.payload;\n\nvar tags = {\n    environment: payload.name\n};\n\nvar values = {\n    temperature: payload.ambient_temperature_f,\n    humidity: payload.humidity,\n    target_temperature: payload.target_temperature_f,\n    mode: payload.hvac_mode,\n    has_leaf: payload.has_leaf\n};\n\n\nmsg.payload = [values, tags];\n\nnode.log(\"Transformed Message:\" + JSON.stringify(msg.payload));\n\nreturn msg;",
+    "outputs":1,
+    "noerr":0,
+    "x":704.5,
+    "y":156,
+    "wires":[  
+      [  
+        "290460e3.42dca",
+        "480b44d1.c556ac"
+      ]
+    ]
+  },
+  {  
+    "id":"290460e3.42dca",
+    "type":"debug",
+    "z":"ae98ab97.f28078",
+    "name":"",
+    "active":true,
+    "console":"false",
+    "complete":"false",
+    "x":1020.5,
+    "y":94,
+    "wires":[  
+
+    ]
+  },
+  {  
+    "id":"480b44d1.c556ac",
+    "type":"influxdb out",
+    "z":"ae98ab97.f28078",
+    "influxdb":"35be8522.490f6a",
+    "name":"Save to InfluxDB",
+    "measurement":"environment",
+    "x":1038.5,
+    "y":189,
+    "wires":[  
+
+    ]
+  }
+]
