@@ -1,0 +1,124 @@
+[
+  {  
+    "type":"tab",
+    "id":"de89aa68.0ef0b8",
+    "label":"Log Environment Readings",
+    "_def":{  
+      "defaults":{  
+        "label":{  
+          "value":""
+        }
+      }
+    }
+  },
+  {  
+    "id":"71e0d9c1.89b338",
+    "type":"comment",
+    "z":"de89aa68.0ef0b8",
+    "name":"Post Environment Data to influxDB",
+    "info":"This flow illustrates how to take sensor data from MQTT, transform that data and post to a local InfluxDB instance.\n\nTo modify this flow for you own environment, set the MQTT and InfluxDB nodes to your local setup",
+    "x":192.5,
+    "y":256,
+    "wires":[]
+  },
+  {  
+    "id":"314a10f2.443c3",
+    "type":"mqtt-broker",
+    "z":"de89aa68.0ef0b8",
+    "broker":"10.171.5.102",
+    "port":"1883",
+    "tls":null,
+    "clientid":"",
+    "usetls":false,
+    "compatmode":true,
+    "keepalive":"60",
+    "cleansession":true,
+    "willTopic":"",
+    "willQos":"0",
+    "willRetain":null,
+    "willPayload":"",
+    "birthTopic":"",
+    "birthQos":"0",
+    "birthRetain":null,
+    "birthPayload":""
+  },
+  {  
+    "id":"864bc94f.d4c408",
+    "type":"influxdb",
+    "z":"de89aa68.0ef0b8",
+    "hostname":"10.171.5.129",
+    "port":"8086",
+    "database":"rosie",
+    "name":"Home InfluxDB"
+  },
+  {  
+    "id":"9c409ad9.71a638",
+    "type":"mqtt in",
+    "z":"de89aa68.0ef0b8",
+    "name":"Environment Sensor Readings",
+    "topic":"/environment",
+    "qos":"1",
+    "broker":"314a10f2.443c3",
+    "x":150.5,
+    "y":130,
+    "wires":[  
+      [  
+        "3bb42ba4.e85d74",
+        "ba8f7e59.19da2"
+      ]
+    ]
+  },
+  {  
+    "id":"3bb42ba4.e85d74",
+    "type":"debug",
+    "z":"de89aa68.0ef0b8",
+    "name":"MQTT Payload",
+    "active":true,
+    "console":"false",
+    "complete":"payload",
+    "x":453.5,
+    "y":71,
+    "wires":[]
+  },
+  {  
+    "id":"ba8f7e59.19da2",
+    "type":"function",
+    "z":"de89aa68.0ef0b8",
+    "name":"Transform MQTT Message",
+    "func":"if (msg.payload.length === 0) {\n    node.error(\"Error\", \"No message payload found\");\n}\n\nvar payload = JSON.parse(msg.payload);\n\nvar tags = {\n    environment: payload.environment\n};\n\nvar values = {\n    temperature: payload.temp,\n    humidity: payload.humidity,\n    barometric: payload.baro,\n    pressure: payload.pressure\n};\n\n\nmsg.payload = [values, tags];\n\nnode.log(\"Transformed Message:\" + JSON.stringify(msg.payload));\n\nreturn msg;",
+    "outputs":1,
+    "noerr":0,
+    "x":444.5,
+    "y":183,
+    "wires":[  
+      [  
+        "fd7b05e.e82eaf8",
+        "cdda2276.42a11"
+      ]
+    ]
+  },
+  {  
+    "id":"cdda2276.42a11",
+    "type":"mqtt out",
+    "z":"de89aa68.0ef0b8",
+    "name":"Notify client",
+    "topic":"/environment_ack",
+    "qos":"1",
+    "retain":"true",
+    "broker":"314a10f2.443c3",
+    "x":808.5,
+    "y":215,
+    "wires":[]
+  },
+  {  
+    "id":"fd7b05e.e82eaf8",
+    "type":"influxdb out",
+    "z":"de89aa68.0ef0b8",
+    "influxdb":"864bc94f.d4c408",
+    "name":"Post to InfluxDB",
+    "measurement":"environment",
+    "x":817.5,
+    "y":87,
+    "wires":[]
+  }
+]
