@@ -1,3 +1,8 @@
+/*
+ * Name: Environment Sensors
+ * Description: This flow illustrates how to take sensor data from MQTT, transform that data and post to a local InfluxDB instance.
+ * To modify this flow for you own environment, set the MQTT and InfluxDB nodes to your local setup.
+ */
 [
   {  
     "type":"tab",
@@ -11,6 +16,7 @@
       }
     }
   },
+  // Comment Node
   {  
     "id":"71e0d9c1.89b338",
     "type":"comment",
@@ -21,12 +27,13 @@
     "y":256,
     "wires":[]
   },
+  // MQTT Broker Setup
   {  
     "id":"314a10f2.443c3",
     "type":"mqtt-broker",
     "z":"de89aa68.0ef0b8",
-    "broker":"10.171.5.102",
-    "port":"1883",
+    "broker":"10.171.5.102", // Server running MQTT Service
+    "port":"1883", // Server Port
     "tls":null,
     "clientid":"",
     "usetls":false,
@@ -42,21 +49,23 @@
     "birthRetain":null,
     "birthPayload":""
   },
+  // InfluxDB Configuration
   {  
     "id":"864bc94f.d4c408",
     "type":"influxdb",
     "z":"de89aa68.0ef0b8",
-    "hostname":"10.171.5.129",
-    "port":"8086",
-    "database":"rosie",
+    "hostname":"10.171.5.129", // Server location
+    "port":"8086", // Port
+    "database":"rosie", // InfluxDB Database Name
     "name":"Home InfluxDB"
   },
+  // MQTT Topic Node
   {  
     "id":"9c409ad9.71a638",
     "type":"mqtt in",
     "z":"de89aa68.0ef0b8",
     "name":"Environment Sensor Readings",
-    "topic":"/environment",
+    "topic":"/environment", //MQTT Endpoint
     "qos":"1",
     "broker":"314a10f2.443c3",
     "x":150.5,
@@ -68,6 +77,7 @@
       ]
     ]
   },
+  // Debug node
   {  
     "id":"3bb42ba4.e85d74",
     "type":"debug",
@@ -80,6 +90,7 @@
     "y":71,
     "wires":[]
   },
+  // Function node to transform MQTT Messages for saving to InfluxDB
   {  
     "id":"ba8f7e59.19da2",
     "type":"function",
@@ -97,6 +108,7 @@
       ]
     ]
   },
+  // MQTT Topic for sending an acknowldgement message
   {  
     "id":"cdda2276.42a11",
     "type":"mqtt out",
@@ -110,6 +122,7 @@
     "y":215,
     "wires":[]
   },
+  // InfluxDB Node for posting environment data
   {  
     "id":"fd7b05e.e82eaf8",
     "type":"influxdb out",

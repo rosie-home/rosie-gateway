@@ -1,4 +1,9 @@
-[  
+/*
+ * Name: Nest Sensors
+ * Description: This flow illustrates how to get Nest thermostat readings, transform that data and post to a local InfluxDB instance.
+ * To modify this flow for you own environment, set the NEST and InfluxDB nodes to your local setup.
+ */
+ [  
   {  
     "type":"tab",
     "id":"ae98ab97.f28078",
@@ -11,12 +16,13 @@
       }
     }
   },
+  // MQTT Broker Configuration
   {  
     "id":"22ab56d8.dd54aa",
     "type":"mqtt-broker",
     "z":"52a0f579.ad5f0c",
-    "broker":"localhost",
-    "port":"1883",
+    "broker":"localhost", // Server location
+    "port":"1883", // Server port
     "clientid":"",
     "usetls":false,
     "verifyservercert":true,
@@ -32,6 +38,7 @@
     "birthRetain":null,
     "birthPayload":""
   },
+  // Comment node
   {  
     "id":"deba15ef.be0ed8",
     "type":"comment",
@@ -44,21 +51,24 @@
 
     ]
   },
+  // Nest Config Node
   {  
     "id":"86bc13c3.5f201",
     "type":"nest-config",
     "z":"ae98ab97.f28078",
     "account":"Entryway Nest"
   },
+  // InfluxDB Config node
   {  
     "id":"35be8522.490f6a",
     "type":"influxdb",
     "z":"ae98ab97.f28078",
-    "hostname":"10.171.5.129",
-    "port":"8086",
-    "database":"rosie",
+    "hostname":"10.171.5.129", // InfluxDB Server Location
+    "port":"8086", // InfluxDB Port
+    "database":"rosie", // Influx Database
     "name":"Home InfluxDB"
   },
+  // Debug node
   {  
     "id":"9947631e.66b8a",
     "type":"debug",
@@ -73,6 +83,7 @@
 
     ]
   },
+  // HTTP Request to Nest API. ID and Config Variables obtained via a Nest developer account
   {  
     "id":"10f126b1.5285c9",
     "type":"nest request",
@@ -91,6 +102,7 @@
       ]
     ]
   },
+  // Debug node
   {  
     "id":"7d3d6e0e.31d0f",
     "type":"debug",
@@ -105,6 +117,7 @@
 
     ]
   },
+  // Inject node to trigger the start of the flow
   {  
     "id":"156affbf.c601f",
     "type":"inject",
@@ -124,6 +137,7 @@
       ]
     ]
   },
+  // Function node
   {  
     "id":"3ce92b17.99dfb4",
     "type":"function",
@@ -141,6 +155,7 @@
       ]
     ]
   },
+  // Debug node
   {  
     "id":"290460e3.42dca",
     "type":"debug",
@@ -155,6 +170,7 @@
 
     ]
   },
+  // Include node for saving thermostat data
   {  
     "id":"480b44d1.c556ac",
     "type":"influxdb out",
