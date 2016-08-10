@@ -5,3 +5,7 @@ home controller for the homes of now and the future. No proprietary hardware and
 
 The Rosie System is organized around central hub or gateway, a repository and a network of connected sensors. [See this document](/docs/architecture.md) for more information about the architecture of the Rosie system.
 
+## Getting Started with Rosie
+
+- [Hardware Recommendations - Gateway](docs/hardwaresetup.md)
+- [Software Setup - Gateway](docs/softwaresetup.md)
