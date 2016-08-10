@@ -1,0 +1,1 @@
+![Rosie Architecture](RosieHome.png "Rosie Architecture")
