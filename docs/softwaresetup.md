@@ -44,9 +44,13 @@ Now, run mosquitto as a background process to make sure that things are ok.
 $ mosquitto &
 ```
 
+## Installing Telegraf
+
+[TODO]
+
 ## Auto-starting services
 
-### Autostarting node-red
+### Auto-starting node-red
 
 Once you've installed node-red and mosquitto on your Gateway, you'll want to configure them to auto-run when you hub starts up.
 
@@ -137,7 +141,7 @@ $ chkconfig --level 2345 nodeted on
 /etc/rc.d/init.d/nodered start
 ```
 
-### Autostarting mosquitto
+### Auto-starting mosquitto
 
 1. Create a conf file basd on the preinstalled example file
 
@@ -151,3 +155,7 @@ mv /etc/mosquitto/mosquitto.conf.example /etc/mosquitto/mosquitto.conf
 systemctl enable mosquitto.service
 systemctl start mosquitto.service
 ```
+
+### Auto-starting Telegraf
+
+[TODO]
