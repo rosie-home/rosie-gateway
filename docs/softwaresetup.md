@@ -57,7 +57,8 @@ $ mkdir /etc/init.d/nodered
 $ chmod 755 /etc/init.d/nodered
 ```
 
-2. Download [this init.d script](https://gist.github.com/bigmonkeyboy/9962293) for node-red and copy it into the file you created in the last step. Alternatively, you can copy the code below 
+2. Download [this init.d script](https://gist.github.com/bigmonkeyboy/9962293) for node-red and copy it into the file you created in the last step. Alternatively, you can copy the code below. If you download the file linked, be sure to 
+change the first uncommented line from "USER=pi" to "USER=root."
 
 ```bash
 #! /bin/sh
