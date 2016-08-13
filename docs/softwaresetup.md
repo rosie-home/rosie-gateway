@@ -46,7 +46,67 @@ $ mosquitto &
 
 ## Installing Telegraf
 
-[TODO]
+1. To collect server stats from the gateway, you'll need to install telegraf.
+
+```
+cd ~
+wget https://dl.influxdata.com/telegraf/releases/telegraf-0.13.1-1_linux_armhf.tar.gz
+tar xvfz telegraf-0.13.1-1_linux_armhf.tar.gz
+cd telegraf-0.13.1-1
+```
+
+Once you've installed Telegraf, you'll need to modify the `telegraf.conf` file to log to the remote InfluxDB instance on your Repository. 
+Note: If you've not yet completed the [Repository setup steps](https://github.com/rosie-home/rosie-repository/blob/master/docs/softwaresetup.md) do that first and then return to complete configuring Telegraf on your gateway.
+
+2. Open the `telegraf.conf` file for editing
+
+```
+vi etc/telegraf/telegraf.conf
+```
+
+3. On line 60 (`:60`), set the `hostname` to your gateway named
+
+```bash
+hostname = "Rosie-Gateway"
+```
+
+4. On line 74 (`:74`), set the `urls` value to the IP address of your repository server
+
+```bash
+urls = ["http://10.171.5.129:8086"]
+```
+
+5. On line 76 (`:76`), set the database value to the same database you're using for repository statistics (default is `telegraf`)
+
+```bash
+database = "telegraf"
+```
+
+6. On line 82 (`:82`), set the `retention_policy` value. Every InfluxDB database has one or more rentention policies that dictate
+how long data is stored before deletion. On my repository, I have a few policies, one that keeps data for two days and one for two weeks. 
+Since I only want server data for heartbeat purposes, and it logs frequently, I'll use a shorter policy.
+
+For more information on creating retention policies in InfluxDB [see this article](https://docs.influxdata.com/influxdb/v0.13/query_language/database_management/#retention-policy-management).
+
+```bash
+## Retention policy to write to.
+retention_policy = "two_days_only"
+```
+
+7. On lines 89 and 90, set the user name, set the username and password for your InfluxDB instance
+
+```
+username = "admin"
+password = "admin"
+```
+
+8. Hit the `ESC` key and type `wq!` to save your changes.
+
+9. TO ensure that everything is working, run telegraf with the recently edited config file:
+
+```
+~/telegraf-0.13.1-1/usr/bin/telegraf -config ~/telegraf-0.13.1-1/etc/telegraf/telegraf.conf
+```
 
 ## Auto-starting services
 
@@ -158,4 +218,41 @@ systemctl start mosquitto.service
 
 ### Auto-starting Telegraf
 
-[TODO]
+1. Create a service file in the Systemd folder. 
+
+```
+touch /usr/lib/systemd/system/telegraf.service
+```
+
+If the file already exists, skip to the next step.
+
+2. Open the file for editing and paste the following
+
+```
+[Unit]
+Description=The plugin-driven server agent for reporting metrics into InfluxDB
+Documentation=https://github.com/influxdata/telegraf
+After=network.target
+
+[Service]
+EnvironmentFile=-/etc/default/telegraf
+User=root
+Environment='STDOUT=/var/log/telegraf/telegraf.log'
+Environment='STDERR=/var/log/telegraf/telegraf.log'
+ExecStart=/bin/sh -c "exec ~/telegraf-0.13.1-1/usr/bin/telegraf -config ~/telegraf-0.13.1-1/etc/telegraf/telegraf.conf ${TELEGRAF_OPTS} >>${STDOUT} 2>>${STDERR}"
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target
+Alias=telegraf.service
+```
+
+3. Finally, reload the systemd daemon and start the service
+
+```
+systemctl daemon-reload
+systemctl enable telegraf
+systemctl start telegraf
+```
