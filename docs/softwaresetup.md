@@ -224,7 +224,7 @@ change the first uncommented line from `USER=pi` to `USER=root`.
   touch /usr/lib/systemd/system/telegraf.service
   ```
 
-If the file already exists, skip to the next step.
+  If the file already exists, skip to the next step.
 
 2. Open the file for editing and paste the following
 
