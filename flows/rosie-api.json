@@ -1,0 +1,309 @@
+/*
+ * Name: Rosie API
+ * Description: This flow illustrates how leverage node-red to host APIs for you home gateway.
+ * To modify this flow for you own environment, set the NEST and InfluxDB nodes to your local setup.
+ */
+[
+  // HTTP Request Node
+  {
+    "id": "3d8d4b7.b6c42b4",
+    "type": "http in",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Get \/environments",
+    "url": "\/environments",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 170,
+    "y": 100,
+    "wires": [
+      [
+        "b481f175.08818",
+        "9a55c046.b3a55"
+      ]
+    ]
+  },
+  // HTTP Request Node
+  {
+    "id": "8a21247e.542e38",
+    "type": "http in",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Get \/cameras",
+    "url": "\/cameras",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 150,
+    "y": 400,
+    "wires": [
+      [
+        "81f6e1e.a5bcd2"
+      ]
+    ]
+  },
+  // HTTP Request Node
+  {
+    "id": "310e588e.36f1d8",
+    "type": "http in",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Get \/server_stats",
+    "url": "\/server_stats",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 160,
+    "y": 520,
+    "wires": [
+      [
+        "c6ea08d3.e546b8"
+      ]
+    ]
+  },
+  // InfluxDB Query
+  {
+    "id": "c08bca0a.830e48",
+    "type": "influxdb in",
+    "z": "37ff8ae1.83e6d6",
+    "influxdb": "864bc94f.d4c408",
+    "name": "Get Environment Stats",
+    "query": "SELECT * FROM environment WHERE time > now() - 2h",
+    "x": 700,
+    "y": 100,
+    "wires": [
+      [
+        "36ee02a2.78520e"
+      ]
+    ]
+  },
+  // HTTP Response
+  {
+    "id": "36ee02a2.78520e",
+    "type": "http response",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Send \/environments",
+    "x": 1000,
+    "y": 100,
+    "wires": [
+      
+    ]
+  },
+  // Query Builder Function
+  {
+    "id": "b481f175.08818",
+    "type": "function",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Build Environments Query",
+    "func": "msg.query = \"SELECT * FROM environment WHERE time > now() - \";\n\nif (msg.payload.time) {\n    msg.query += msg.payload.time;\n} else {\n    msg.query += \"2h\";\n}\n\nif (msg.payload.environment) {\n    msg.query += \" AND environment = \" + msg.payload.environment.replace(\/\\\"\/g, \"'\");\n}\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 430,
+    "y": 100,
+    "wires": [
+      [
+        "c08bca0a.830e48",
+        "221230fc.8c994"
+      ]
+    ]
+  },
+  // HTTP Request Node
+  {
+    "id": "683fa8c6.9ccf18",
+    "type": "http in",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Get \/environments\/temp",
+    "url": "\/environments\/temp",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 190,
+    "y": 260,
+    "wires": [
+      [
+        "98581fc7.76886",
+        "9a55c046.b3a55"
+      ]
+    ]
+  },
+  // Query Builder Function
+  {
+    "id": "98581fc7.76886",
+    "type": "function",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Build Temp Query",
+    "func": "msg.query = \"SELECT last(temperature) FROM environment WHERE time > now() - 1h\";\n\nif (msg.payload.environment) {\n    msg.query += \" AND environment = \" + msg.payload.environment.replace(\/\\\"\/g, \"'\");\n}\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 470,
+    "y": 260,
+    "wires": [
+      [
+        "fd3f546b.830068",
+        "221230fc.8c994"
+      ]
+    ]
+  },
+  // HTTP Response node
+  {
+    "id": "40d65e24.9fb8e",
+    "type": "http response",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Send \/environments\/temp",
+    "x": 970,
+    "y": 260,
+    "wires": [
+      
+    ]
+  },
+  // InfluxDB Query node
+  {
+    "id": "fd3f546b.830068",
+    "type": "influxdb in",
+    "z": "37ff8ae1.83e6d6",
+    "influxdb": "864bc94f.d4c408",
+    "name": "Get Temp",
+    "query": "",
+    "x": 700,
+    "y": 260,
+    "wires": [
+      [
+        "40d65e24.9fb8e"
+      ]
+    ]
+  },
+  // Debug node
+  {
+    "id": "9a55c046.b3a55",
+    "type": "debug",
+    "z": "37ff8ae1.83e6d6",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "false",
+    "x": 390,
+    "y": 180,
+    "wires": [
+      
+    ]
+  },
+  // Debug node
+  {
+    "id": "221230fc.8c994",
+    "type": "debug",
+    "z": "37ff8ae1.83e6d6",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "query",
+    "x": 690,
+    "y": 180,
+    "wires": [
+      
+    ]
+  },
+  // Query Builder function
+  {
+    "id": "81f6e1e.a5bcd2",
+    "type": "function",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Build Cameras Query",
+    "func": "msg.query = \"SELECT * FROM camera WHERE time > now() - \";\n\nif (msg.payload.time) {\n    msg.query += msg.payload.time;\n} else {\n    msg.query += \"2h\";\n}\n\nif (msg.payload.location) {\n    msg.query += \" AND loocation = \" + msg.payload.location.replace(\/\\\"\/g, \"'\");\n}\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 420,
+    "y": 400,
+    "wires": [
+      [
+        "28a89396.0a9f8c"
+      ]
+    ]
+  },
+  // InfluxDB Query node
+  {
+    "id": "28a89396.0a9f8c",
+    "type": "influxdb in",
+    "z": "37ff8ae1.83e6d6",
+    "influxdb": "864bc94f.d4c408",
+    "name": "Get Camera Events",
+    "query": "",
+    "x": 730,
+    "y": 400,
+    "wires": [
+      [
+        "c5d08547.85a558"
+      ]
+    ]
+  },
+  // HTTP Response Node
+  {
+    "id": "c5d08547.85a558",
+    "type": "http response",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Send \/cameras",
+    "x": 980,
+    "y": 400,
+    "wires": [
+      
+    ]
+  },
+  // Query Builder node
+  {
+    "id": "c6ea08d3.e546b8",
+    "type": "function",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Build Server Stats Query",
+    "func": "msg.query = \"SELECT * FROM camera WHERE time > now() - \";\n\nif (msg.payload.time) {\n    msg.query += msg.payload.time;\n} else {\n    msg.query += \"2h\";\n}\n\nif (msg.payload.location) {\n    msg.query += \" AND loocation = \" + msg.payload.location.replace(\/\\\"\/g, \"'\");\n}\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 430,
+    "y": 520,
+    "wires": [
+      [
+        "e0aaa44a.b8fc18"
+      ]
+    ]
+  },
+  // InfluxDB Query node
+  {
+    "id": "e0aaa44a.b8fc18",
+    "type": "influxdb in",
+    "z": "37ff8ae1.83e6d6",
+    "influxdb": "6fb4db56.8558b4",
+    "name": "Get Server Stats",
+    "query": "",
+    "x": 720,
+    "y": 520,
+    "wires": [
+      [
+        "ca9bf350.b9cc4"
+      ]
+    ]
+  },
+  // HTTP Response Node
+  {
+    "id": "ca9bf350.b9cc4",
+    "type": "http response",
+    "z": "37ff8ae1.83e6d6",
+    "name": "Send \/server_stats",
+    "x": 990,
+    "y": 520,
+    "wires": [
+      
+    ]
+  },
+  // Rosie InfluxDB Config
+  {
+    "id": "864bc94f.d4c408",
+    "type": "influxdb",
+    "z": "",
+    "hostname": "10.171.5.129",
+    "port": "8086",
+    "database": "rosie",
+    "name": "Rosie InfluxDB"
+  },
+  // Telegraf InfluxDB config
+  {
+    "id": "6fb4db56.8558b4",
+    "type": "influxdb",
+    "z": "",
+    "hostname": "10.171.5.129",
+    "port": "8086",
+    "database": "telegraf",
+    "name": "Telegraf  DB"
+  }
+]

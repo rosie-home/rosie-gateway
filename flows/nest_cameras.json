@@ -1,0 +1,146 @@
+/*
+ * Name: Nest Cameras
+ * Description: This flow illustrates how to get Nest camera events, transform that data and post to a local InfluxDB instance.
+ * To modify this flow for you own environment, set the NEST and InfluxDB nodes to your local setup.
+ */
+[
+  {
+    "id":"9e25476c.3c64d8",
+    "type":"nest request",
+    "z":"8312f1a5.97bb5",
+    "account":"",
+    "devicetype":"cameras",
+    "deviceid":"4ZjeJTift8O7beQifyXFoczVnKUSMIx-OezUDGVk69bI9mqwG0Kztw",
+    "streaming":"false",
+    "name":"Nest Cam - Matthew's Room",
+    "x":360,
+    "y":220,
+    "wires":[
+      [
+        "2e31d044.9757f",
+        "11a7d4db.aa6f6b"
+      ]
+    ]
+  },
+  {
+    "id":"4e03fb79.aff0e4",
+    "type":"inject",
+    "z":"8312f1a5.97bb5",
+    "name":"Start Flow",
+    "topic":"",
+    "payload":"",
+    "payloadType":"date",
+    "repeat":"60",
+    "crontab":"",
+    "once":true,
+    "x":130,
+    "y":300,
+    "wires":[
+      [
+        "9e25476c.3c64d8",
+        "ab8b4f21.f221a"
+      ]
+    ]
+  },
+  {
+    "id":"2e31d044.9757f",
+    "type":"function",
+    "z":"8312f1a5.97bb5",
+    "name":"Transform Camera Details",
+    "func":"if (msg.payload.length === 0) {\n    node.error(\"Error\", \"No message payload found\");\n    return;\n}\n\nif (msg.payload.error) {\n    return;\n}\n\nvar payload = msg.payload;\n\nvar tags = {\n    location: payload.name\n};\n\nvar values = {\n    device_id: payload.device_id,\n    is_online: payload.is_online,\n    last_is_online_change: payload.last_is_online_change,\n    last_event_time: payload.last_event.start_time || \"\",\n    event_sound: payload.last_event.has_sound,\n    event_motion: payload.last_event.has_motion, \n    event_image_url: payload.last_event.image_url || \"\",\n    event_gif_url: payload.last_event.animated_image_url || \"\",\n    app_url: payload.app_url,\n    snapshot_url: payload.snapshot_url\n};\n\n// Change to array of values/tags for each camera\nmsg.payload = [values, tags];\n\nnode.log(\"Transformed Message:\" + JSON.stringify(msg.payload));\n\nreturn msg;",
+    "outputs":1,
+    "noerr":0,
+    "x":630,
+    "y":320,
+    "wires":[
+      [
+        "c6ca9186.0345b"
+      ]
+    ]
+  },
+  {
+    "id":"26c0b086.459d5",
+    "type":"influxdb out",
+    "z":"8312f1a5.97bb5",
+    "influxdb":"864bc94f.d4c408",
+    "name":"Save to InfluxDB",
+    "measurement":"cameras",
+    "x":1230,
+    "y":500,
+    "wires":[
+
+    ]
+  },
+  {
+    "id":"944b79f3.0adf58",
+    "type":"debug",
+    "z":"8312f1a5.97bb5",
+    "name":"",
+    "active":true,
+    "console":"false",
+    "complete":"payload",
+    "x":1230,
+    "y":220,
+    "wires":[
+
+    ]
+  },
+  {
+    "id":"ab8b4f21.f221a",
+    "type":"nest request",
+    "z":"8312f1a5.97bb5",
+    "account":"",
+    "devicetype":"cameras",
+    "deviceid":"pyx8k-kzWnRuDkd52thF9U6IJBDTHse10f2Lax02PBfI9mqwG0Kztw",
+    "streaming":"false",
+    "name":"Nest Cam - Boy's Room",
+    "x":370,
+    "y":420,
+    "wires":[
+      [
+        "2e31d044.9757f",
+        "11a7d4db.aa6f6b"
+      ]
+    ]
+  },
+  {
+    "id":"c6ca9186.0345b",
+    "type":"function",
+    "z":"8312f1a5.97bb5",
+    "name":"Is Last Event New?",
+    "func":"var isNew = false;\nvar deviceFound = false;\n\nvar payload = msg.payload[0];\n\nvar deviceDetails = {\n    device_id: payload.device_id,\n    last_event_time: payload.last_event_time\n};\n\nif (!context.global.devices) {\n    context.global.devices = [];\n    \n    context.global.devices.push(deviceDetails);\n    \n    return msg;\n}\n\nfor(var i = 0; i < context.global.devices.length; i++) {\n    var globalDevice = context.global.devices[i];\n    \n    if (globalDevice.device_id === deviceDetails.device_id) {\n        deviceFound = true;\n        \n        if(globalDevice.last_event_time !== deviceDetails.last_event_time) {\n            isNew = true;\n            globalDevice.last_event_time = deviceDetails.last_event_time;\n        }\n    }\n}\n\nif (!deviceFound) {\n         context.global.devices.push(deviceDetails);\n    }\n\nif (isNew) {\n    return msg;\n} else {\n    return;\n}",
+    "outputs":1,
+    "noerr":0,
+    "x":910,
+    "y":320,
+    "wires":[
+      [
+        "944b79f3.0adf58",
+        "26c0b086.459d5"
+      ]
+    ]
+  },
+  {
+    "id":"11a7d4db.aa6f6b",
+    "type":"debug",
+    "z":"8312f1a5.97bb5",
+    "name":"",
+    "active":true,
+    "console":"false",
+    "complete":"false",
+    "x":670,
+    "y":180,
+    "wires":[
+
+    ]
+  },
+  {
+    "id":"864bc94f.d4c408",
+    "type":"influxdb",
+    "z":"",
+    "hostname":"10.171.5.129",
+    "port":"8086",
+    "database":"rosie",
+    "name":"Rosie InfluxDB"
+  }
+]

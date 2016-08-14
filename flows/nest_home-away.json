@@ -1,0 +1,152 @@
+/*
+ * Name: Nest Home/Away
+ * Description: This flow illustrates how to set Home/Away status on the Nest from the Rosie Gateway.
+ * To modify this flow for you own environment, set the NEST and InfluxDB nodes to your local setup.
+ */
+ [
+  {
+    "id":"c9981383.aad1c",
+    "type":"mqtt in",
+    "z":"923ec9c3.0d2e68",
+    "name":"Home/Away Message",
+    "topic":"/home_status",
+    "qos":"2",
+    "broker":"314a10f2.443c3",
+    "x":180,
+    "y":140,
+    "wires":[
+      [
+        "d7d7c7a3.078748",
+        "e723de32.d272b"
+      ]
+    ]
+  },
+  {
+    "id":"2f682d2.98517d2",
+    "type":"nest status",
+    "z":"923ec9c3.0d2e68",
+    "account":"",
+    "structure_id":"MEbLivticYTN1MwT5KJ3Wnn6uOnBDxyWk_L7u_G4fQG9MuRBQW5bAQ",
+    "away":"null",
+    "name":"Set Nest Home/Away",
+    "x":1080,
+    "y":220,
+    "wires":[
+      [
+
+      ]
+    ]
+  },
+  {
+    "id":"d7d7c7a3.078748",
+    "type":"function",
+    "z":"923ec9c3.0d2e68",
+    "name":"Transform MQTT Request",
+    "func":"\nreturn msg;",
+    "outputs":1,
+    "noerr":0,
+    "x":510,
+    "y":120,
+    "wires":[
+      [
+        "2f682d2.98517d2",
+        "f116f7d9.ad73d8"
+      ]
+    ]
+  },
+  {
+    "id":"e723de32.d272b",
+    "type":"debug",
+    "z":"923ec9c3.0d2e68",
+    "name":"",
+    "active":true,
+    "console":"false",
+    "complete":"false",
+    "x":410,
+    "y":220,
+    "wires":[
+
+    ]
+  },
+  {
+    "id":"1c62eb6d.7db1c5",
+    "type":"http in",
+    "z":"923ec9c3.0d2e68",
+    "name":"Home/Away Request",
+    "url":"/home_status",
+    "method":"post",
+    "swaggerDoc":"",
+    "x":180,
+    "y":280,
+    "wires":[
+      [
+        "e723de32.d272b",
+        "f03572.7219da9"
+      ]
+    ]
+  },
+  {
+    "id":"f03572.7219da9",
+    "type":"function",
+    "z":"923ec9c3.0d2e68",
+    "name":"Transform HTTP Request",
+    "func":"\nreturn msg;",
+    "outputs":1,
+    "noerr":0,
+    "x":510,
+    "y":340,
+    "wires":[
+      [
+        "2f682d2.98517d2",
+        "f116f7d9.ad73d8"
+      ]
+    ]
+  },
+  {
+    "id":"f116f7d9.ad73d8",
+    "type":"debug",
+    "z":"923ec9c3.0d2e68",
+    "name":"",
+    "active":true,
+    "console":"false",
+    "complete":"false",
+    "x":770,
+    "y":220,
+    "wires":[
+
+    ]
+  },
+  {
+    "id":"18543476.0d231c",
+    "type":"comment",
+    "z":"923ec9c3.0d2e68",
+    "name":"Toggle Nest Home Status From MQTT or HTTP Request",
+    "info":"",
+    "x":970,
+    "y":380,
+    "wires":[
+
+    ]
+  },
+  {
+    "id":"314a10f2.443c3",
+    "type":"mqtt-broker",
+    "z":"",
+    "broker":"10.171.5.102",
+    "port":"1883",
+    "tls":null,
+    "clientid":"",
+    "usetls":false,
+    "compatmode":true,
+    "keepalive":"60",
+    "cleansession":true,
+    "willTopic":"",
+    "willQos":"0",
+    "willRetain":null,
+    "willPayload":"",
+    "birthTopic":"",
+    "birthQos":"0",
+    "birthRetain":null,
+    "birthPayload":""
+  }
+]

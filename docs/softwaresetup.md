@@ -1,5 +1,11 @@
 # Software Setup for the Rosie Gateway
 
+The Rosie Gateway relies on three software packages to do its work:
+
+- [Node-RED](http://nodered.org/)
+- [Mosquitto](https://mosquitto.org/)
+- [Telegraf](https://influxdata.com/time-series-platform/telegraf/)
+
 The Below instructions assume you're installing node-red and mosquitto on a Samsung Artik 5 or 10, which runs Fedora 22. For alternative or general installation
 instructions, see the [node-red documentation](http://nodered.org/docs/getting-started/installation).
 
